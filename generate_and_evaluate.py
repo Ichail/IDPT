@@ -1,5 +1,6 @@
 from random import choice, shuffle, randint
 from time import time
+import re
 
 
 def generate_simple_rules(code_max, n_max, n_generate, log_oper_choice=["and", "or", "not"]):
@@ -101,15 +102,28 @@ def generate_rand_facts(code_max, M):
     return facts
 
 
-def evidence_check(evidence):
-    pass
+def one_evidence_check(in_value , rules_list, res_list) -> []:
+    condition = rules_list[0].get('if')
+    logical_operand = list(condition.keys())[0]
+    print(logical_operand)
+    tolerance_range = condition.get(logical_operand)
+    print(tolerance_range)
+    if logical_operand == 'or' and in_value in tolerance_range:
+        print("1")
+        pass
+    if logical_operand == 'and':#?????????????? something going wrong
+        pass
+    if logical_operand == 'not':
+        pass
+    result = rules_list[0]['then']
+
 
 def main():
     # samples:
-    #print(generate_simple_rules(100, 4, 10), end='\n\n')
-    #print(generate_random_rules(100, 4, 10), end='\n\n')
-    #print(generate_stairway_rules(100, 4, 10, ["or"]), end='\n\n')
-    #print(generate_ring_rules(100, 4, 10, ["or"]), end='\n\n')
+    # print(generate_simple_rules(100, 4, 10), end='\n\n')
+    # print(generate_random_rules(100, 4, 10), end='\n\n')
+    # print(generate_stairway_rules(100, 4, 10, ["or"]), end='\n\n')
+    # print(generate_ring_rules(100, 4, 10, ["or"]), end='\n\n')
 
     # generate rules and facts and check time
     time_start = time()
@@ -117,18 +131,16 @@ def main():
     M = 100000
     rules = generate_simple_rules(100, 4, N)
     facts = generate_rand_facts(100, M)
-    print(len(rules))
-    print(len(facts))
+    # print(len(facts))
     print("%d rules generated in %f seconds" % (N, time() - time_start))
-    for i in range(0,M):
-        for j in range(0,N):
-            pass
-    # load and validate rules
-    # YOUR CODE HERE
 
-    # check facts vs rules
+    result_list = [0 for i in range(0, 10000)]
+    value = 50
+    one_evidence_check(value, rules, result_list)
+    number_for_validate = 10
+
     time_start = time()
-
+    # check facts vs rules
     # YOUR CODE HERE
 
     print("%d facts validated vs %d rules in %f seconds" % (M, N, time() - time_start))
