@@ -101,26 +101,38 @@ def generate_rand_facts(code_max, M):
     return facts
 
 
-# samples:
-print(generate_simple_rules(100, 4, 10), end='\n\n')
-print(generate_random_rules(100, 4, 10), end='\n\n')
-print(generate_stairway_rules(100, 4, 10, ["or"]), end='\n\n')
-print(generate_ring_rules(100, 4, 10, ["or"]), end='\n\n')
+def evidence_check(evidence):
+    pass
 
-# generate rules and facts and check time
-time_start = time()
-N = 100000
-M = 1000
-rules = generate_simple_rules(100, 4, N)
-facts = generate_rand_facts(100, M)
-print("%d rules generated in %f seconds" % (N, time() - time_start))
+def main():
+    # samples:
+    #print(generate_simple_rules(100, 4, 10), end='\n\n')
+    #print(generate_random_rules(100, 4, 10), end='\n\n')
+    #print(generate_stairway_rules(100, 4, 10, ["or"]), end='\n\n')
+    #print(generate_ring_rules(100, 4, 10, ["or"]), end='\n\n')
 
-# load and validate rules
-# YOUR CODE HERE
+    # generate rules and facts and check time
+    time_start = time()
+    N = 100000
+    M = 100000
+    rules = generate_simple_rules(100, 4, N)
+    facts = generate_rand_facts(100, M)
+    print(len(rules))
+    print(len(facts))
+    print("%d rules generated in %f seconds" % (N, time() - time_start))
+    for i in range(0,M):
+        for j in range(0,N):
+            pass
+    # load and validate rules
+    # YOUR CODE HERE
 
-# check facts vs rules
-time_start = time()
+    # check facts vs rules
+    time_start = time()
 
-# YOUR CODE HERE
+    # YOUR CODE HERE
 
-print("%d facts validated vs %d rules in %f seconds" % (M, N, time() - time_start))
+    print("%d facts validated vs %d rules in %f seconds" % (M, N, time() - time_start))
+
+
+if __name__ == "__main__":
+    main()
