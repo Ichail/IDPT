@@ -2,7 +2,7 @@
 ## Сборка
 	sudo docker build -t lr1-img:2.0 .
 ## Запуск 
-	sudo docker run lr1-img:2.0
+	sudo docker run --rm lr1-img:2.0
 
 
 
