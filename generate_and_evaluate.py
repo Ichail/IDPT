@@ -25,10 +25,9 @@ def generate_simple_rules(code_max, n_max, n_generate, log_oper_choice=["and", "
     return (rules)
 
 
-def generate_stairway_rules(n_max, n_generate, log_oper_choice=["and", "or", "not"]):
+def generate_stairway_rules(code_max, n_max, n_generate, log_oper_choice=["and", "or", "not"]):
     rules = []
     for j in range(0, n_generate):
-
         log_oper = choice(log_oper_choice)  # not means and-not (neither)
         if n_max < 2:
             n_max = 2
@@ -44,7 +43,7 @@ def generate_stairway_rules(n_max, n_generate, log_oper_choice=["and", "or", "no
         }
         rules.append(rule)
     shuffle(rules)
-    return (rules)
+    return rules
 
 
 def generate_ring_rules(code_max, n_max, n_generate, log_oper_choice=["and", "or", "not"]):
@@ -166,21 +165,19 @@ def validate_rules(rules_list):
         if rule['then']:
             parse_rules[1].append(rule['then'])
     for i in range(len(rules_list) - 1):
-        if rules_list[1][i] == rules_list[1][j]:
-            if ('and' in rules_list[i].keys() and 'not' in rules_list[j].keys) or (
-                    'and' in rules_list[j].keys() and 'not' in rules_list[i].keys):
-                if rules_list[0][j]['and'] == rules_list[0][i]['not'] or rules_list[0][i]['and'] == rules_list[0][j]['not']:
+        for j in range(i + 1, len(rules_list)-1):
+            if i >= j:
+                return 0
+            if parse_rules[1][i] == parse_rules[1][j]:
+                if ('and' in rules_list[i].keys() and 'not' in rules_list[j].keys) or ('and' in rules_list[j].keys() and 'not' in rules_list[i].keys):
+                    if parse_rules[0][j]['and'] == parse_rules[0][i]['not'] or parse_rules[0][i]['and'] == parse_rules[0][j]['not']:
+                        rules_list[j].clear()
+                        rules_list[i].clear()
+            
 
-            if ('or' in rules_list[j].keys() and 'not' in rules_list[i].keys) or (
-                    'or' in rules_list[i].keys() and 'not' in rules_list[j].keys):
-                if rules_list[0][j]['or'] == rules_list[0][i]['not'] or rules_list[0][i]['or'] == rules_list[0][j]['not']:
-
-        if 'not' in rules_list[0][i].keys() and 'not' in rules_list[0][j].keys():
-            if rules_list[1][i] in rules_list[0][j]['not'] and rules_list[1][j] in rules_list[0][i]['not']:
-                rules_list[i].clear()
-                rules_list[j].clear()  # check "if not A then B -> if not C then A"
-            if rules_list[1][i] in rules_list[0][j]['not'] and rules_list[1][j] not in rules_list[0][i]['not']:
-
+    for rule in rules_list:
+        if rule != {}:
+            parse_rules[2].append(rule)
 
 def main():
     # samples:
