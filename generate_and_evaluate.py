@@ -88,12 +88,6 @@ def generate_random_rules(code_max, n_max, n_generate, log_oper_choice=["and", "
     return rules
 
 
-# def generate_seq_facts(M):
-#   facts = list(range(0, M))
-#  shuffle(facts)
-#  return facts
-
-
 def generate_rand_facts(code_max, M):
     facts = []
     for i in range(0, M):
@@ -101,7 +95,7 @@ def generate_rand_facts(code_max, M):
     return facts
 
 
-def evidence_check(facts, rules_list, result_list) -> []:
+def evidence_check(rules_list, facts) -> []:
     s_list = [[], [], []]  # or and not
     result = []
     it = 0
@@ -115,7 +109,6 @@ def evidence_check(facts, rules_list, result_list) -> []:
                     s_list[1].append(rule)
                 if key == 'not':
                     s_list[2].append(rule)
-    start_check = time()
     for rule in s_list[0]:  # or
         for item in rule['if']['or']:
             size = len(rule['if']['or'])
@@ -128,7 +121,7 @@ def evidence_check(facts, rules_list, result_list) -> []:
                 if it == size:
                     result.append(0)
                     it = 0
-    for rule in s_list[1]:  # check rules with 'and'
+    for rule in s_list[1]:  # and
         for item in rule['if']['and']:
             size = len(rule['if']['and'])
             if item in facts:
@@ -151,13 +144,11 @@ def evidence_check(facts, rules_list, result_list) -> []:
         else:
             result.append(0)
             it = 0
-    end_check = time()
-    time_result = end_check - start_check
-    print(f'time to check facts vs rules {time_result}\n')
+    return result
 
 
 def validate_rules(rules_list):
-    print('start check rules conflicts')
+    print('.', end="")
     parse_rules = [[], [], []]  # if then validate
     for rule in rules_list:
         if rule['if']:
@@ -165,46 +156,65 @@ def validate_rules(rules_list):
         if rule['then']:
             parse_rules[1].append(rule['then'])
     for i in range(len(rules_list) - 1):
-        for j in range(i + 1, len(rules_list)-1):
+        for j in range(i + 1, len(rules_list) - 1):
             if i >= j:
                 return 0
             if parse_rules[1][i] == parse_rules[1][j]:
-                if ('and' in rules_list[i].keys() and 'not' in rules_list[j].keys) or ('and' in rules_list[j].keys() and 'not' in rules_list[i].keys):
-                    if parse_rules[0][j]['and'] == parse_rules[0][i]['not'] or parse_rules[0][i]['and'] == parse_rules[0][j]['not']:
+                if ('and' in rules_list[i].keys() and 'not' in rules_list[j].keys) or (
+                        'and' in rules_list[j].keys() and 'not' in rules_list[i].keys):
+                    if parse_rules[0][j]['and'] == parse_rules[0][i]['not'] or parse_rules[0][i]['and'] == \
+                            parse_rules[0][j]['not']:
                         rules_list[j].clear()
                         rules_list[i].clear()
-            
+                if ('or' in rules_list[j].keys() and 'not' in rules_list[i].keys) or (
+                        'or' in rules_list[i].keys() and 'not' in rules_list[j].keys):
+                    if parse_rules[0][j]['or'] == parse_rules[0][i]['not'] or parse_rules[0][i]['or'] == \
+                            parse_rules[0][j]['not']:
+                        rules_list[j].clear()
+                        rules_list[i].clear()
+            if 'not' in parse_rules[0][i].keys() and 'not' in parse_rules[0][j].keys():
+                if parse_rules[1][i] in parse_rules[0][j]['not'] and parse_rules[1][j] in parse_rules[0][i]['not']:
+                    rules_list[i].clear()
+                    rules_list[j].clear()
+                if parse_rules[1][i] in parse_rules[0][j]['not'] and parse_rules[1][j] not in parse_rules[0][i]['not']:
+                    rules_list[i].clear()
+                    rules_list[j].clear()
 
     for rule in rules_list:
         if rule != {}:
             parse_rules[2].append(rule)
+    return parse_rules[2]
+
 
 def main():
-    # samples:
-    # print(generate_simple_rules(100, 4, 10), end='\n\n')
-    # print(generate_random_rules(100, 4, 10), end='\n\n')
-    # print(generate_stairway_rules(100, 4, 10, ["or"]), end='\n\n')
-    # print(generate_ring_rules(100, 4, 10, ["or"]), end='\n\n')
-
-    # generate rules and facts and check time
-    time_start = time()
     N = 10000
     M = 1000
-    time_start = time()
     rules = generate_simple_rules(100, 4, N)
     random_rules = generate_random_rules(100, 4, N)
     stairway_rules = generate_stairway_rules(100, 4, N)
     ring_rules = generate_ring_rules(100, 4, N)
 
     facts = generate_rand_facts(100, M)
-    # print(len(facts))
+    unique_facts = set(facts)
 
-    print("%d rules generated in %f seconds" % (N, time() - time_start))
+    time_start = time()
+    correct_simple = validate_rules(rules)
+    correct_random = validate_rules(random_rules)
+    correct_stairway = validate_rules(stairway_rules)
+    correct_ring = validate_rules(ring_rules)
+    validate_time = time() - time_start
+    print("%d rules validate in %f seconds" % (N, validate_time))
 
-    # check facts vs rules
-    # YOUR CODE HERE
+    # facts vs rules
+    time_start = time()
+    evidence_check(correct_simple, unique_facts)
+    evidence_check(correct_random, unique_facts)
+    evidence_check(correct_stairway, unique_facts)
+    evidence_check(correct_ring, unique_facts)
+    check_time = time() - time_start
+    print("%d rules check in %f seconds:" % (N, check_time))
 
-    print("%d facts validated vs %d rules in %f seconds" % (M, N, time() - time_start))
+    print("Finally time:", + (validate_time + check_time))
 
 
 if __name__ == "__main__":
