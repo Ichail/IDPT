@@ -116,6 +116,7 @@ def evidence_check(facts, rules_list, result_list) -> []:
                     s_list[1].append(rule)
                 if key == 'not':
                     s_list[2].append(rule)
+    start_check = time()
     for rule in s_list[0]:  # or
         for item in rule['if']['or']:
             size = len(rule['if']['or'])
@@ -128,6 +129,17 @@ def evidence_check(facts, rules_list, result_list) -> []:
                 if it == size:
                     result.append(0)
                     it = 0
+    for rule in s_list[1]:  # check rules with 'and'
+        for item in rule['if']['and']:
+            size = len(rule['if']['and'])
+            if item in facts:
+                it += 1
+        if it == size:
+            result.append(rule['then'])
+            it = 0
+        else:
+            result.append(0)
+            it = 0
 
     for rule in s_list[2]:  # not
         for item in rule['if']['not']:
@@ -140,7 +152,34 @@ def evidence_check(facts, rules_list, result_list) -> []:
         else:
             result.append(0)
             it = 0
-    print(result)
+    end_check = time()
+    time_result = end_check - start_check
+    print(f'time to check facts vs rules {time_result}\n')
+
+
+def validate_rules(rules_list):
+    print('start check rules conflicts')
+    parse_rules = [[], [], []]  # if then validate
+    for rule in rules_list:
+        if rule['if']:
+            parse_rules[0].append(rule['if'])
+        if rule['then']:
+            parse_rules[1].append(rule['then'])
+    for i in range(len(rules_list) - 1):
+        if rules_list[1][i] == rules_list[1][j]:
+            if ('and' in rules_list[i].keys() and 'not' in rules_list[j].keys) or (
+                    'and' in rules_list[j].keys() and 'not' in rules_list[i].keys):
+                if rules_list[0][j]['and'] == rules_list[0][i]['not'] or rules_list[0][i]['and'] == rules_list[0][j]['not']:
+
+            if ('or' in rules_list[j].keys() and 'not' in rules_list[i].keys) or (
+                    'or' in rules_list[i].keys() and 'not' in rules_list[j].keys):
+                if rules_list[0][j]['or'] == rules_list[0][i]['not'] or rules_list[0][i]['or'] == rules_list[0][j]['not']:
+
+        if 'not' in rules_list[0][i].keys() and 'not' in rules_list[0][j].keys():
+            if rules_list[1][i] in rules_list[0][j]['not'] and rules_list[1][j] in rules_list[0][i]['not']:
+                rules_list[i].clear()
+                rules_list[j].clear()  # check "if not A then B -> if not C then A"
+            if rules_list[1][i] in rules_list[0][j]['not'] and rules_list[1][j] not in rules_list[0][i]['not']:
 
 
 def main():
@@ -152,17 +191,19 @@ def main():
 
     # generate rules and facts and check time
     time_start = time()
-    N = 100000
+    N = 10000
     M = 1000
+    time_start = time()
     rules = generate_simple_rules(100, 4, N)
+    random_rules = generate_random_rules(100, 4, N)
+    stairway_rules = generate_stairway_rules(100, 4, N)
+    ring_rules = generate_ring_rules(100, 4, N)
+
     facts = generate_rand_facts(100, M)
     # print(len(facts))
+
     print("%d rules generated in %f seconds" % (N, time() - time_start))
 
-    result_list = [0 for i in range(0, 10000)]
-    evidence_check(facts, rules,result_list)
-
-    time_start = time()
     # check facts vs rules
     # YOUR CODE HERE
 
