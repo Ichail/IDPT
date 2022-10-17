@@ -1,6 +1,5 @@
 from random import choice, shuffle, randint
 from time import time
-import re
 
 
 def generate_simple_rules(code_max, n_max, n_generate, log_oper_choice=["and", "or", "not"]):
@@ -98,7 +97,7 @@ def generate_rand_facts(code_max, M):
 def evidence_check(rules_list, facts) -> []:
     s_list = [[], [], []]  # or and not
     result = []
-    it = 0
+    temp_it = 0
     # create list or and not
     for rule in rules_list:
         if rule != {}:
@@ -114,36 +113,36 @@ def evidence_check(rules_list, facts) -> []:
             size = len(rule['if']['or'])
             if item in facts:
                 result.append(rule['then'])
-                it = 0
+                temp_it = 0
                 break
             else:
-                it += 1
-                if it == size:
+                temp_it += 1
+                if temp_it == size:
                     result.append(0)
-                    it = 0
+                    temp_it = 0
     for rule in s_list[1]:  # and
         for item in rule['if']['and']:
             size = len(rule['if']['and'])
             if item in facts:
-                it += 1
-        if it == size:
+                temp_it += 1
+        if temp_it == size:
             result.append(rule['then'])
-            it = 0
+            temp_it = 0
         else:
             result.append(0)
-            it = 0
+            temp_it = 0
 
     for rule in s_list[2]:  # not
         for item in rule['if']['not']:
             size = len(rule['if']['not'])
             if item not in facts:
-                it += 1
-        if it == size:
+                temp_it += 1
+        if temp_it == size:
             result.append(rule['then'])
-            it = 0
+            temp_it = 0
         else:
             result.append(0)
-            it = 0
+            temp_it = 0
     return result
 
 
@@ -159,7 +158,7 @@ def validate_rules(rules_list):
         for j in range(i + 1, len(rules_list) - 1):
             if i >= j:
                 return 0
-            if parse_rules[1][i] == parse_rules[1][j]:
+            if parse_rules[1][i] == parse_rules[1][j]:  # if and/or A then B -> if not A then B
                 if ('and' in rules_list[i].keys() and 'not' in rules_list[j].keys) or (
                         'and' in rules_list[j].keys() and 'not' in rules_list[i].keys):
                     if parse_rules[0][j]['and'] == parse_rules[0][i]['not'] or parse_rules[0][i]['and'] == \
@@ -173,13 +172,18 @@ def validate_rules(rules_list):
                         rules_list[j].clear()
                         rules_list[i].clear()
             if 'not' in parse_rules[0][i].keys() and 'not' in parse_rules[0][j].keys():
-                if parse_rules[1][i] in parse_rules[0][j]['not'] and parse_rules[1][j] in parse_rules[0][i]['not']:
+                # if not A then B -> if not B then A
+                if parse_rules[1][i] in parse_rules[0][j]['not'] and parse_rules[1][j] in \
+                        parse_rules[0][i]['not']:
+                    # mutual exclusion
                     rules_list[i].clear()
                     rules_list[j].clear()
-                if parse_rules[1][i] in parse_rules[0][j]['not'] and parse_rules[1][j] not in parse_rules[0][i]['not']:
+                if parse_rules[1][i] in parse_rules[0][j]['not'] and parse_rules[1][j] not in \
+                        parse_rules[0][i]['not']:
+                    # nesting
                     rules_list[i].clear()
                     rules_list[j].clear()
-    # xmmmmm... probably iam need use set union
+    # so so slowly ... probably need use set union
     for rule in rules_list:
         if rule != {}:
             parse_rules[2].append(rule)
@@ -187,14 +191,14 @@ def validate_rules(rules_list):
 
 
 def main():
-    N = 10000
-    M = 1000
-    rules = generate_simple_rules(100, 4, N)
-    random_rules = generate_random_rules(100, 4, N)
-    stairway_rules = generate_stairway_rules(100, 4, N)
-    ring_rules = generate_ring_rules(100, 4, N)
+    number_of_rules = 10000
+    number_of_facts = 1000
+    rules = generate_simple_rules(100, 4, number_of_rules)
+    random_rules = generate_random_rules(100, 4, number_of_rules)
+    stairway_rules = generate_stairway_rules(100, 4, number_of_rules)
+    ring_rules = generate_ring_rules(100, 4, number_of_rules)
 
-    facts = generate_rand_facts(100, M)
+    facts = generate_rand_facts(number_of_facts, number_of_rules)
     unique_facts = set(facts)
 
     time_start = time()
@@ -203,7 +207,7 @@ def main():
     correct_stairway = validate_rules(stairway_rules)
     correct_ring = validate_rules(ring_rules)
     validate_time = time() - time_start
-    print("%d rules validate in %f seconds" % (N, validate_time))
+    print(number_of_rules, "rules validate in seconds:", validate_time)
 
     # facts vs rules
     time_start = time()
@@ -212,9 +216,9 @@ def main():
     evidence_check(correct_stairway, unique_facts)
     evidence_check(correct_ring, unique_facts)
     check_time = time() - time_start
-    print("%d rules check in %f seconds:" % (N, check_time))
+    print(number_of_rules, "rules check in seconds:", check_time)
 
-    print("Finally time:", + (validate_time + check_time))
+    print("Finally time:",  (validate_time + check_time))
 
 
 if __name__ == "__main__":
