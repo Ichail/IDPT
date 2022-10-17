@@ -86,13 +86,13 @@ def generate_random_rules(code_max, n_max, n_generate, log_oper_choice=["and", "
         }
         rules.append(rule)
     shuffle(rules)
-    return (rules)
+    return rules
 
 
-def generate_seq_facts(M):
-    facts = list(range(0, M))
-    shuffle(facts)
-    return facts
+# def generate_seq_facts(M):
+#   facts = list(range(0, M))
+#  shuffle(facts)
+#  return facts
 
 
 def generate_rand_facts(code_max, M):
@@ -102,21 +102,23 @@ def generate_rand_facts(code_max, M):
     return facts
 
 
-def one_evidence_check(in_value , rules_list, res_list) -> []:
+def evidence_check(facts, rules_list, res_list) -> []:
     condition = rules_list[0].get('if')
     logical_operand = list(condition.keys())[0]
     print(logical_operand)
     tolerance_range = condition.get(logical_operand)
     print(tolerance_range)
-    if logical_operand == 'or' and in_value in tolerance_range:
-        print("1")
-        pass
-    if logical_operand == 'and':#?????????????? something going wrong
-        pass
-    if logical_operand == 'not':
-        pass
-    result = rules_list[0]['then']
-
+    s_list = [[], [], []]  # or and not
+    for rule in rules_list:
+        if rule != {}:
+            for key in rule['if'].keys():
+                if key == 'or':
+                    s_list[0].append(rule)
+                if key == 'or':
+                    s_list[0].append(rule)
+                if key == 'not':
+                    s_list[2].append(rule)
+    print(s_list)
 
 def main():
     # samples:
@@ -136,7 +138,7 @@ def main():
 
     result_list = [0 for i in range(0, 10000)]
     value = 50
-    one_evidence_check(value, rules, result_list)
+    evidence_check(facts, rules, result_list)
     number_for_validate = 10
 
     time_start = time()
