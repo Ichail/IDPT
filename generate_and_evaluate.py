@@ -179,7 +179,7 @@ def validate_rules(rules_list):
                 if parse_rules[1][i] in parse_rules[0][j]['not'] and parse_rules[1][j] not in parse_rules[0][i]['not']:
                     rules_list[i].clear()
                     rules_list[j].clear()
-
+    # xmmmmm... probably iam need use set union
     for rule in rules_list:
         if rule != {}:
             parse_rules[2].append(rule)
