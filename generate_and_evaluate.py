@@ -102,23 +102,46 @@ def generate_rand_facts(code_max, M):
     return facts
 
 
-def evidence_check(facts, rules_list, res_list) -> []:
-    condition = rules_list[0].get('if')
-    logical_operand = list(condition.keys())[0]
-    print(logical_operand)
-    tolerance_range = condition.get(logical_operand)
-    print(tolerance_range)
+def evidence_check(facts, rules_list, result_list) -> []:
     s_list = [[], [], []]  # or and not
+    result = []
+    it = 0
+    # create list or and not
     for rule in rules_list:
         if rule != {}:
             for key in rule['if'].keys():
                 if key == 'or':
                     s_list[0].append(rule)
-                if key == 'or':
-                    s_list[0].append(rule)
+                if key == 'and':
+                    s_list[1].append(rule)
                 if key == 'not':
                     s_list[2].append(rule)
-    print(s_list)
+    for rule in s_list[0]:  # or
+        for item in rule['if']['or']:
+            size = len(rule['if']['or'])
+            if item in facts:
+                result.append(rule['then'])
+                it = 0
+                break
+            else:
+                it += 1
+                if it == size:
+                    result.append(0)
+                    it = 0
+
+    for rule in s_list[2]:  # not
+        for item in rule['if']['not']:
+            size = len(rule['if']['not'])
+            if item not in facts:
+                it += 1
+        if it == size:
+            result.append(rule['then'])
+            it = 0
+        else:
+            result.append(0)
+            it = 0
+    print(result)
+
 
 def main():
     # samples:
@@ -130,16 +153,14 @@ def main():
     # generate rules and facts and check time
     time_start = time()
     N = 100000
-    M = 100000
+    M = 1000
     rules = generate_simple_rules(100, 4, N)
     facts = generate_rand_facts(100, M)
     # print(len(facts))
     print("%d rules generated in %f seconds" % (N, time() - time_start))
 
     result_list = [0 for i in range(0, 10000)]
-    value = 50
-    evidence_check(facts, rules, result_list)
-    number_for_validate = 10
+    evidence_check(facts, rules,result_list)
 
     time_start = time()
     # check facts vs rules
